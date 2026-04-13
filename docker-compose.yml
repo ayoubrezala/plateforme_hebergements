@@ -1,0 +1,70 @@
+services:
+
+  mongodb:
+    image: mongo:7
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  mariadb:
+    image: mariadb:11
+    container_name: mariadb
+    command: --bind-address=0.0.0.0
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_USER: etl_user
+      MARIADB_PASSWORD: etl_pass
+      MARIADB_DATABASE: dw_hebergements
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Étape 1 : exécuter le pipeline ETL
+  pipeline:
+    build: .
+    container_name: pipeline_etl
+    command: python pipeline.py
+    environment:
+      MONGO_URI: mongodb://mongodb:27017
+      MARIADB_HOST: mariadb
+      MARIADB_PORT: "3306"
+      MARIADB_USER: etl_user
+      MARIADB_PASSWORD: etl_pass
+    depends_on:
+      mongodb:
+        condition: service_started
+      mariadb:
+        condition: service_healthy
+    volumes:
+      - datalake:/app/data_lake
+
+  # Étape 2 : serveur web + API
+  web:
+    build: .
+    container_name: serveur_web
+    ports:
+      - "5050:5050"
+    environment:
+      MONGO_URI: mongodb://mongodb:27017
+      MARIADB_HOST: mariadb
+      MARIADB_PORT: "3306"
+      MARIADB_USER: etl_user
+      MARIADB_PASSWORD: etl_pass
+    depends_on:
+      mongodb:
+        condition: service_started
+    volumes:
+      - datalake:/app/data_lake
+
+volumes:
+  mongo_data:
+  mariadb_data:
+  datalake:

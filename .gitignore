@@ -1,0 +1,12 @@
+.DS_Store
+__pycache__/
+*.pyc
+.pytest_cache/
+venv/
+env/
+.env
+
+# Ignorer les données générées
+data_lake/raw/
+data_lake/clean/
+data_lake/analytics/
