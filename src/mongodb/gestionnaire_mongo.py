@@ -123,6 +123,13 @@ class GestionnaireMongo:
         """Retourne la liste des départements distincts."""
         return sorted([d for d in self._clean.distinct("departement") if d])
 
+    def inserer_reservation(self, reservation: dict):
+        """Insère une réservation dans la collection dédiée."""
+        collection = self._db["reservations"]
+        result = collection.insert_one(reservation)
+        logger.info(f"  → Réservation créée : {result.inserted_id}")
+        return result.inserted_id
+
     def vider_collections(self):
         """Supprime toutes les données (utile pour les tests)."""
         self._raw.delete_many({})

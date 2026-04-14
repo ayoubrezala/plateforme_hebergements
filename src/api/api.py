@@ -9,6 +9,7 @@ from flask_cors import CORS
 from bson import json_util
 import json
 
+from datetime import datetime
 from src.mongodb.gestionnaire_mongo import GestionnaireMongo
 from src.config import API_HOST, API_PORT
 
@@ -58,6 +59,7 @@ def lister_hebergements():
     offset = int(request.args.get("offset", 0))
 
     projection = {"_id": 0, "localisation": 0}
+    # Inclure image_url et disponibilites dans les résultats
     resultats = mongo.rechercher(filtres, projection, limite, offset)
     total = mongo.compter_documents()
 
@@ -80,6 +82,53 @@ def obtenir_hebergement(id_unique):
     if not resultats:
         return jsonify({"error": "Hébergement non trouvé"}), 404
     return jsonify(_serialiser(resultats[0]))
+
+
+@app.route("/api/hebergements/<id_unique>/disponibilites", methods=["GET"])
+def obtenir_disponibilites(id_unique):
+    """Retourne les disponibilités d'un hébergement."""
+    resultats = mongo.rechercher(
+        {"_id_unique": id_unique},
+        {"_id": 0, "disponibilites": 1, "nom": 1}
+    )
+    if not resultats:
+        return jsonify({"error": "Hébergement non trouvé"}), 404
+    return jsonify(_serialiser(resultats[0]))
+
+
+@app.route("/api/reservations", methods=["POST"])
+def creer_reservation():
+    """Crée une nouvelle réservation."""
+    data = request.get_json()
+    champs_requis = ["id_hebergement", "nom_client", "prenom_client",
+                     "email_client", "telephone_client", "date_arrivee",
+                     "date_depart", "nb_personnes"]
+    for champ in champs_requis:
+        if not data.get(champ):
+            return jsonify({"error": f"Champ requis manquant : {champ}"}), 400
+
+    # Vérifier que l'hébergement existe
+    hebergement = mongo.rechercher({"_id_unique": data["id_hebergement"]}, {"_id": 0})
+    if not hebergement:
+        return jsonify({"error": "Hébergement non trouvé"}), 404
+
+    reservation = {
+        "id_hebergement": data["id_hebergement"],
+        "nom_hebergement": hebergement[0].get("nom"),
+        "nom_client": data["nom_client"],
+        "prenom_client": data["prenom_client"],
+        "email_client": data["email_client"],
+        "telephone_client": data["telephone_client"],
+        "date_arrivee": data["date_arrivee"],
+        "date_depart": data["date_depart"],
+        "nb_personnes": int(data["nb_personnes"]),
+        "message": data.get("message", ""),
+        "statut": "en_attente",
+        "date_creation": datetime.now().isoformat(),
+    }
+
+    result = mongo.inserer_reservation(reservation)
+    return jsonify({"success": True, "message": "Réservation enregistrée", "id": str(result)}), 201
 
 
 @app.route("/api/types", methods=["GET"])

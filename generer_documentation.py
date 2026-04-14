@@ -88,7 +88,7 @@ def generer():
     pdf.set_font("Helvetica", "", 11)
     pdf.set_text_color(60, 60, 60)
     pdf.cell(0, 7, "Technologies : Python, MongoDB, MariaDB, Flask, Docker", align="C", new_x="LMARGIN", new_y="NEXT")
-    pdf.cell(0, 7, "Sources : data.gouv.fr / Pays de la Loire / Saint-Malo", align="C", new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(0, 7, "Sources : Atout France / Pays de la Loire / Ile-de-France / Loire-Atlantique / Saint-Malo", align="C", new_x="LMARGIN", new_y="NEXT")
 
     # === 1. INTRODUCTION ===
     pdf.add_page()
@@ -105,13 +105,20 @@ def generer():
     )
 
     pdf.sous_titre("Sources de donnees")
+    pdf.puce("Hebergements classes en France - Atout France (~21 000 enregistrements, national)")
     pdf.puce("Hebergements collectifs touristiques - Pays de la Loire (325 enregistrements)")
-    pdf.puce("Hebergements locatifs touristiques - Pays de la Loire (4075 enregistrements)")
-    pdf.puce("Hebergements touristiques - Saint-Malo (6 enregistrements, donnees agregees)")
+    pdf.puce("Hebergements locatifs touristiques - Pays de la Loire (4 075 enregistrements)")
+    pdf.puce("Hotelleries de plein air - Pays de la Loire (314 enregistrements)")
+    pdf.puce("Hebergements collectifs - Loire-Atlantique (97 enregistrements)")
+    pdf.puce("Hebergements locatifs - Loire-Atlantique (770 enregistrements)")
+    pdf.puce("Hotels classes - Ile-de-France (2 030 enregistrements)")
+    pdf.puce("Hebergements touristiques - Saint-Malo (6 enregistrements)")
     pdf.ln(3)
     pdf.paragraphe(
-        "Au total, plus de 4400 enregistrements bruts sont collectes, "
-        "produisant environ 4380 enregistrements propres apres nettoyage et deduplication."
+        "Au total, plus de 28 000 enregistrements bruts sont collectes depuis 8 sources "
+        "couvrant la France entiere (Atout France) et plusieurs regions (Pays de la Loire, "
+        "Loire-Atlantique, Ile-de-France, Bretagne). Apres nettoyage et deduplication, "
+        "la base contient plus de 20 000 hebergements uniques."
     )
 
     # === 2. ARCHITECTURE ===
@@ -147,6 +154,7 @@ def generer():
         "|-- Dockerfile               # Image Docker de l'application\n"
         "|-- docker-compose.yml       # Orchestration multi-conteneurs\n"
         "|-- .dockerignore            # Fichiers exclus du build\n"
+        "|-- generer_documentation.py       # Generateur de documentation PDF\n"
         "|-- generer_dashboard_powerbi.py  # Export Excel pour Power BI"
     )
 
@@ -196,6 +204,8 @@ def generer():
     pdf.puce("Type d'hebergement : mapping vers des categories normalisees (Hotel, Camping, Meuble...)")
     pdf.puce("Capacite : conversion en entier, rejet des valeurs <= 0")
     pdf.puce("Adresse : concatenation des champs adresse1/2/3")
+    pdf.puce("Image : attribution d'une URL Unsplash coherente par type d'hebergement (deterministe par ID)")
+    pdf.puce("Disponibilites : generation de 3 a 8 creneaux realistes sur 90 jours avec prix/nuit et places")
 
     pdf.sous_titre("Deduplication")
     pdf.paragraphe(
@@ -232,9 +242,21 @@ def generer():
         '  "longitude": -1.5536,\n'
         '  "capacite_personnes": 50,\n'
         '  "telephone": "+33240112233",\n'
+        '  "image_url": "https://images.unsplash.com/photo-...",\n'
+        '  "disponibilites": [\n'
+        '    { "date_debut": "2026-04-20", "date_fin": "2026-04-28",\n'
+        '      "prix_nuit": 95, "places_restantes": 3 }\n'
+        '  ],\n'
         '  "source": "hebergements_collectifs",\n'
         '  "localisation": { "type": "Point", "coordinates": [-1.5536, 47.2184] }\n'
         "}"
+    )
+
+    pdf.sous_titre("Collection reservations")
+    pdf.paragraphe(
+        "Une collection dediee stocke les demandes de reservation soumises "
+        "via le formulaire de l'interface web. Chaque document contient les coordonnees "
+        "du client, les dates de sejour, le nombre de personnes et un statut (en_attente, confirmee, annulee)."
     )
 
     # === 6. DATA WAREHOUSE ===
@@ -292,19 +314,31 @@ def generer():
 
     pdf.sous_titre("Endpoints disponibles")
     pdf.code_block(
-        "GET /api/hebergements        Lister/filtrer les hebergements\n"
-        "    ?type=Hotel              Filtrer par type\n"
-        "    ?commune=NANTES          Filtrer par commune\n"
-        "    ?departement=44          Filtrer par departement\n"
-        "    ?q=ocean                 Recherche textuelle\n"
-        "    ?limit=50&offset=0       Pagination\n"
+        "GET /api/hebergements              Lister/filtrer les hebergements\n"
+        "    ?type=Hotel                    Filtrer par type\n"
+        "    ?commune=NANTES                Filtrer par commune\n"
+        "    ?departement=44                Filtrer par departement\n"
+        "    ?q=ocean                       Recherche textuelle\n"
+        "    ?limit=50&offset=0             Pagination\n"
         "\n"
-        "GET /api/hebergements/<id>   Detail d'un hebergement\n"
-        "GET /api/types               Liste des types\n"
-        "GET /api/communes            Liste des communes\n"
-        "GET /api/departements        Liste des departements\n"
-        "GET /api/statistiques        Statistiques globales\n"
-        "GET /api/health              Etat de sante de l'API"
+        "GET /api/hebergements/<id>         Detail d'un hebergement\n"
+        "GET /api/hebergements/<id>/disponibilites\n"
+        "                                   Disponibilites d'un hebergement\n"
+        "POST /api/reservations             Creer une reservation\n"
+        "GET /api/types                     Liste des types\n"
+        "GET /api/communes                  Liste des communes\n"
+        "GET /api/departements              Liste des departements\n"
+        "GET /api/statistiques              Statistiques globales\n"
+        "GET /api/health                    Etat de sante de l'API"
+    )
+
+    pdf.sous_titre("Endpoint de reservation")
+    pdf.paragraphe(
+        "L'endpoint POST /api/reservations attend un corps JSON avec les champs obligatoires : "
+        "id_hebergement, nom_client, prenom_client, email_client, telephone_client, "
+        "date_arrivee, date_depart, nb_personnes. Un champ message optionnel permet "
+        "d'ajouter des demandes particulieres. La reservation est enregistree dans MongoDB "
+        "avec le statut 'en_attente'."
     )
 
     pdf.paragraphe(
@@ -324,9 +358,16 @@ def generer():
     pdf.sous_titre("Fonctionnalites")
     pdf.puce("Barre de statistiques en temps reel (total, types, communes, departements)")
     pdf.puce("Filtres : recherche textuelle, filtre par type, filtre par departement")
-    pdf.puce("Affichage en grille de cartes responsives")
+    pdf.puce("Affichage en grille de cartes avec images (Unsplash, par type d'hebergement)")
+    pdf.puce("Cartes cliquables ouvrant un overlay de detail avec transition animee")
+    pdf.puce("Page de detail : image, informations completes, coordonnees, site web")
+    pdf.puce("Grille des disponibilites cliquables (dates, prix/nuit, places restantes)")
+    pdf.puce("Formulaire de reservation complet (nom, prenom, email, telephone, dates, "
+             "nombre de personnes, message) avec validation et feedback visuel")
+    pdf.puce("Selection d'un creneau de disponibilite pre-remplissant les dates du formulaire")
     pdf.puce("Pagination avec navigation precedent/suivant")
-    pdf.puce("Design moderne avec effets de survol et transitions")
+    pdf.puce("Design moderne avec effets de survol, transitions et skeleton loaders")
+    pdf.puce("Fermeture du detail par touche Echap ou clic a l'exterieur")
 
     # === 10. TESTS ===
     pdf.add_page()

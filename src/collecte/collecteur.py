@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 class CollecteurDonnees:
     """Responsable de la collecte des données depuis les sources open data."""
 
-    def __init__(self, timeout: int = 30):
+    def __init__(self, timeout: int = 60):
         self._timeout = timeout
         self._session = requests.Session()
         self._session.headers.update({"User-Agent": "PlatformeHebergements/1.0"})

@@ -31,10 +31,13 @@
             --font-sans: 'General Sans', -apple-system, system-ui, sans-serif;
             --font-display: 'Instrument Serif', Georgia, serif;
             --font-mono: 'JetBrains Mono', monospace;
+            --success: oklch(0.55 0.15 145);
+            --success-light: oklch(0.92 0.04 145);
+            --error: oklch(0.55 0.2 25);
+            --error-light: oklch(0.92 0.04 25);
         }
 
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
         html { scroll-behavior: smooth; }
 
         body {
@@ -69,6 +72,9 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
         }
         .nav-brand-icon {
             width: 28px;
@@ -117,10 +123,7 @@
             color: var(--text-primary);
             max-width: 14ch;
         }
-        .hero h1 em {
-            font-style: italic;
-            color: var(--accent-dark);
-        }
+        .hero h1 em { font-style: italic; color: var(--accent-dark); }
         .hero-desc {
             font-size: 1.05rem;
             color: var(--text-secondary);
@@ -237,8 +240,7 @@
             right: 14px;
             top: 50%;
             transform: translateY(-50%);
-            width: 0;
-            height: 0;
+            width: 0; height: 0;
             border-left: 4px solid transparent;
             border-right: 4px solid transparent;
             border-top: 5px solid var(--text-tertiary);
@@ -266,7 +268,6 @@
         }
         .btn-search:hover { background: var(--accent-dark); }
         .btn-search:active { transform: scale(0.97); }
-
         .btn-reset {
             padding: 8px 14px;
             background: transparent;
@@ -283,7 +284,7 @@
         .btn-reset:hover { color: var(--text-secondary); border-color: var(--border-hover); }
         .btn-reset:active { transform: scale(0.97); }
 
-        /* ── RESULTS HEADER ── */
+        /* ── RESULTS ── */
         .results-section {
             max-width: 1320px;
             margin: 0 auto;
@@ -318,12 +319,15 @@
             background: var(--surface-1);
             border: 1px solid var(--border);
             border-radius: var(--radius-md);
-            padding: 24px 26px;
+            overflow: hidden;
             transition: transform 280ms var(--ease-out), box-shadow 280ms var(--ease-out), border-color 280ms var(--ease-out);
-            cursor: default;
+            cursor: pointer;
             opacity: 0;
             transform: translateY(12px);
             animation: cardIn 400ms var(--ease-out) forwards;
+            text-decoration: none;
+            color: inherit;
+            display: block;
         }
         .card:hover {
             transform: translateY(-3px);
@@ -333,13 +337,22 @@
         @keyframes cardIn {
             to { opacity: 1; transform: translateY(0); }
         }
-
+        .card-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+            background: var(--surface-2);
+        }
+        .card-body {
+            padding: 20px 22px;
+        }
         .card-top {
             display: flex;
             align-items: flex-start;
             justify-content: space-between;
             gap: 12px;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
         }
         .card-name {
             font-size: 0.95rem;
@@ -362,11 +375,10 @@
             white-space: nowrap;
             flex-shrink: 0;
         }
-
         .card-details {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 5px;
         }
         .card-row {
             display: flex;
@@ -377,16 +389,11 @@
             line-height: 1.4;
         }
         .card-row svg {
-            width: 15px;
-            height: 15px;
+            width: 15px; height: 15px;
             flex-shrink: 0;
             color: var(--text-tertiary);
         }
-        .card-divider {
-            height: 1px;
-            background: var(--border);
-            margin: 10px 0;
-        }
+        .card-divider { height: 1px; background: var(--border); margin: 10px 0; }
         .card-footer {
             display: flex;
             align-items: center;
@@ -404,6 +411,23 @@
             font-size: 0.82rem;
             font-weight: 500;
             color: var(--accent-dark);
+        }
+        .card-dispo {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.72rem;
+            font-weight: 500;
+            color: var(--success);
+            background: var(--success-light);
+            padding: 2px 8px;
+            border-radius: 100px;
+        }
+        .card-dispo::before {
+            content: '';
+            width: 6px; height: 6px;
+            background: var(--success);
+            border-radius: 50%;
         }
 
         /* ── PAGINATION ── */
@@ -430,11 +454,7 @@
         }
         .pag-btn:hover { border-color: var(--border-hover); background: var(--surface-2); }
         .pag-btn:active { transform: scale(0.97); }
-        .pag-btn:disabled {
-            opacity: 0.35;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
+        .pag-btn:disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
         .pag-info {
             font-family: var(--font-mono);
             font-size: 0.78rem;
@@ -448,13 +468,9 @@
             text-align: center;
             padding: 64px 24px;
         }
-        .state-message p {
-            font-size: 0.95rem;
-            color: var(--text-tertiary);
-        }
+        .state-message p { font-size: 0.95rem; color: var(--text-tertiary); }
         .state-message .state-icon {
-            width: 48px;
-            height: 48px;
+            width: 48px; height: 48px;
             margin: 0 auto 16px;
             background: var(--surface-2);
             border-radius: 50%;
@@ -463,7 +479,6 @@
         }
         .state-message .state-icon svg { width: 22px; height: 22px; color: var(--text-tertiary); }
 
-        /* Skeleton loader */
         .skeleton {
             background: linear-gradient(90deg, var(--surface-2) 25%, oklch(0.96 0.003 250) 50%, var(--surface-2) 75%);
             background-size: 200% 100%;
@@ -478,14 +493,237 @@
             background: var(--surface-1);
             border: 1px solid var(--border);
             border-radius: var(--radius-md);
-            padding: 24px 26px;
+            overflow: hidden;
         }
+        .skeleton-img { height: 200px; }
+        .skeleton-body { padding: 20px 22px; }
         .skeleton-line { height: 12px; margin-bottom: 10px; }
         .skeleton-line.w60 { width: 60%; }
         .skeleton-line.w40 { width: 40%; }
         .skeleton-line.w80 { width: 80%; }
         .skeleton-line.w100 { width: 100%; }
         .skeleton-line.tall { height: 18px; margin-bottom: 16px; }
+
+        /* ── DETAIL PAGE (modal overlay) ── */
+        .detail-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: oklch(0.18 0.01 250 / 0.5);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 40px 16px;
+            overflow-y: auto;
+            opacity: 0;
+            transition: opacity 300ms var(--ease-out);
+        }
+        .detail-overlay.visible { opacity: 1; }
+        .detail-overlay.hidden { pointer-events: none; opacity: 0; }
+
+        .detail-panel {
+            background: var(--surface-1);
+            border-radius: var(--radius-lg);
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 24px 80px oklch(0.18 0.01 250 / 0.2);
+            transform: translateY(20px);
+            transition: transform 400ms var(--ease-out);
+            overflow: hidden;
+        }
+        .detail-overlay.visible .detail-panel { transform: translateY(0); }
+
+        .detail-img {
+            width: 100%;
+            height: 320px;
+            object-fit: cover;
+            display: block;
+        }
+        .detail-close {
+            position: absolute;
+            top: 56px;
+            right: 28px;
+            width: 40px; height: 40px;
+            background: oklch(1 0 0 / 0.85);
+            backdrop-filter: blur(8px);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+            transition: transform 160ms var(--ease-out), background 200ms;
+            z-index: 101;
+        }
+        .detail-close:hover { background: white; transform: scale(1.08); }
+        .detail-close svg { width: 18px; height: 18px; color: var(--text-primary); }
+
+        .detail-content { padding: 32px 36px; }
+        .detail-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .detail-name {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+        }
+        .detail-badge {
+            padding: 5px 14px;
+            background: var(--accent-light);
+            color: var(--accent-dark);
+            font-size: 0.78rem;
+            font-weight: 600;
+            border-radius: 100px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .detail-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .detail-info-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .detail-info-item svg {
+            width: 18px; height: 18px;
+            color: var(--accent);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .detail-info-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-tertiary);
+            margin-bottom: 2px;
+        }
+        .detail-info-value {
+            font-size: 0.88rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        /* ── DISPONIBILITES ── */
+        .section-title {
+            font-size: 0.82rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-tertiary);
+            margin-bottom: 16px;
+        }
+        .dispo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 32px;
+        }
+        .dispo-card {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: border-color 200ms, background 200ms, transform 160ms var(--ease-out);
+        }
+        .dispo-card:hover { border-color: var(--accent); background: var(--accent-light); }
+        .dispo-card.selected {
+            border-color: var(--accent);
+            background: var(--accent-light);
+            box-shadow: 0 0 0 2px oklch(0.55 0.15 160 / 0.2);
+        }
+        .dispo-dates {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+        .dispo-meta {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+        .dispo-prix {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--accent-dark);
+            margin-top: 6px;
+        }
+
+        /* ── FORMULAIRE RESERVATION ── */
+        .reservation-form {
+            background: var(--surface-2);
+            border-radius: var(--radius-md);
+            padding: 28px;
+            margin-top: 8px;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .form-group.full { grid-column: 1 / -1; }
+        .form-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .form-input {
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: var(--font-sans);
+            font-size: 0.88rem;
+            color: var(--text-primary);
+            background: var(--surface-1);
+            outline: none;
+            transition: border-color 200ms, box-shadow 200ms;
+        }
+        .form-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px oklch(0.55 0.15 160 / 0.1);
+        }
+        .form-input::placeholder { color: var(--text-tertiary); }
+        textarea.form-input { resize: vertical; min-height: 80px; }
+
+        .btn-reserver {
+            grid-column: 1 / -1;
+            padding: 12px 28px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-sans);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 200ms, transform 160ms var(--ease-out);
+            margin-top: 6px;
+        }
+        .btn-reserver:hover { background: var(--accent-dark); }
+        .btn-reserver:active { transform: scale(0.98); }
+        .btn-reserver:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .form-message {
+            grid-column: 1 / -1;
+            padding: 10px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: none;
+        }
+        .form-message.success { display: block; background: var(--success-light); color: var(--success); }
+        .form-message.error { display: block; background: var(--error-light); color: var(--error); }
 
         /* ── FOOTER ── */
         footer {
@@ -498,14 +736,8 @@
             border-top: 1px solid var(--border);
             padding-top: 24px;
         }
-        footer span {
-            font-size: 0.75rem;
-            color: var(--text-tertiary);
-        }
-        footer .footer-mono {
-            font-family: var(--font-mono);
-            letter-spacing: -0.01em;
-        }
+        footer span { font-size: 0.75rem; color: var(--text-tertiary); }
+        footer .footer-mono { font-family: var(--font-mono); letter-spacing: -0.01em; }
 
         /* ── RESPONSIVE ── */
         @media (max-width: 768px) {
@@ -515,18 +747,19 @@
             .stat-cell:nth-child(2) { border-radius: 0 var(--radius-md) 0 0; }
             .stat-cell:nth-child(3) { border-radius: 0; }
             .stat-cell:last-child { border-radius: 0 0 var(--radius-md) var(--radius-md); }
-            .filter-bar {
-                flex-direction: column;
-                border-radius: var(--radius-md);
-            }
+            .filter-bar { flex-direction: column; border-radius: var(--radius-md); }
             .filter-divider { width: auto; height: 1px; margin: 0 12px; }
             .filter-actions { padding: 8px 12px; justify-content: stretch; }
             .filter-actions .btn-search, .filter-actions .btn-reset { flex: 1; text-align: center; }
             .cards-grid { grid-template-columns: 1fr; }
             footer { flex-direction: column; gap: 8px; text-align: center; }
+            .detail-panel { margin: 0; border-radius: var(--radius-md); }
+            .detail-img { height: 220px; }
+            .detail-content { padding: 24px 20px; }
+            .form-grid { grid-template-columns: 1fr; }
+            .detail-overlay { padding: 16px 8px; }
         }
 
-        /* ── REDUCED MOTION ── */
         @media (prefers-reduced-motion: reduce) {
             .card { animation: none; opacity: 1; transform: none; }
             .card:hover { transform: none; }
@@ -539,76 +772,87 @@
     <!-- NAV -->
     <nav>
         <div class="nav-inner">
-            <div class="nav-brand">
+            <a class="nav-brand" onclick="afficherListe()">
                 <div class="nav-brand-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3H21m-3.75 3H21"/></svg>
                 </div>
                 <span>Explore</span>
-            </div>
+            </a>
             <span class="nav-meta" id="nav-count"></span>
         </div>
     </nav>
 
-    <!-- HERO -->
-    <section class="hero">
-        <span class="hero-eyebrow">Open Data / data.gouv.fr</span>
-        <h1>Trouvez votre <em>prochain</em> hebergement</h1>
-        <p class="hero-desc">Explorez plus de 4 000 hebergements touristiques issus des donnees ouvertes francaises. Hotels, gites, campings, chambres d'hotes.</p>
-    </section>
+    <!-- MAIN CONTENT (liste) -->
+    <div id="page-liste">
+        <!-- HERO -->
+        <section class="hero">
+            <span class="hero-eyebrow">Open Data / data.gouv.fr</span>
+            <h1>Trouvez votre <em>prochain</em> hebergement</h1>
+            <p class="hero-desc">Explorez des milliers d'hebergements touristiques issus des donnees ouvertes francaises : hotels, gites, campings, chambres d'hotes, residences de tourisme. Sources : Atout France, Pays de la Loire, Ile-de-France, Loire-Atlantique, Saint-Malo.</p>
+        </section>
 
-    <!-- STATS -->
-    <div class="stats-row" id="stats-row">
-        <div class="stat-cell">
-            <span class="stat-number" id="stat-total">--</span>
-            <span class="stat-label">Hebergements indexes</span>
+        <!-- STATS -->
+        <div class="stats-row" id="stats-row">
+            <div class="stat-cell">
+                <span class="stat-number" id="stat-total">--</span>
+                <span class="stat-label">Hebergements indexes</span>
+            </div>
+            <div class="stat-cell">
+                <span class="stat-number" id="stat-types">--</span>
+                <span class="stat-label">Typologies distinctes</span>
+            </div>
+            <div class="stat-cell">
+                <span class="stat-number" id="stat-communes">--</span>
+                <span class="stat-label">Communes couvertes</span>
+            </div>
+            <div class="stat-cell">
+                <span class="stat-number" id="stat-departements">--</span>
+                <span class="stat-label">Departements</span>
+            </div>
         </div>
-        <div class="stat-cell">
-            <span class="stat-number" id="stat-types">--</span>
-            <span class="stat-label">Typologies distinctes</span>
-        </div>
-        <div class="stat-cell">
-            <span class="stat-number" id="stat-communes">--</span>
-            <span class="stat-label">Communes couvertes</span>
-        </div>
-        <div class="stat-cell">
-            <span class="stat-number" id="stat-departements">--</span>
-            <span class="stat-label">Departements</span>
-        </div>
+
+        <!-- FILTERS -->
+        <section class="filter-section">
+            <div class="filter-bar">
+                <div class="filter-input-wrap">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+                    <input type="text" id="search" placeholder="Rechercher par nom ou commune...">
+                </div>
+                <div class="filter-divider"></div>
+                <div class="filter-select-wrap">
+                    <select id="type-filter"><option value="">Tous les types</option></select>
+                </div>
+                <div class="filter-divider"></div>
+                <div class="filter-select-wrap">
+                    <select id="dept-filter"><option value="">Tous les departements</option></select>
+                </div>
+                <div class="filter-actions">
+                    <button class="btn-search" onclick="rechercher()">Rechercher</button>
+                    <button class="btn-reset" onclick="reinitialiser()">Effacer</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- RESULTS -->
+        <section class="results-section">
+            <div class="results-meta">
+                <span class="results-title">Resultats</span>
+                <span class="results-count" id="results-count"></span>
+            </div>
+            <div class="cards-grid" id="results"></div>
+        </section>
+
+        <!-- PAGINATION -->
+        <div class="pagination" id="pagination"></div>
     </div>
 
-    <!-- FILTERS -->
-    <section class="filter-section">
-        <div class="filter-bar">
-            <div class="filter-input-wrap">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
-                <input type="text" id="search" placeholder="Rechercher par nom ou commune...">
-            </div>
-            <div class="filter-divider"></div>
-            <div class="filter-select-wrap">
-                <select id="type-filter"><option value="">Tous les types</option></select>
-            </div>
-            <div class="filter-divider"></div>
-            <div class="filter-select-wrap">
-                <select id="dept-filter"><option value="">Tous les departements</option></select>
-            </div>
-            <div class="filter-actions">
-                <button class="btn-search" onclick="rechercher()">Rechercher</button>
-                <button class="btn-reset" onclick="reinitialiser()">Effacer</button>
-            </div>
-        </div>
-    </section>
-
-    <!-- RESULTS -->
-    <section class="results-section">
-        <div class="results-meta">
-            <span class="results-title">Resultats</span>
-            <span class="results-count" id="results-count"></span>
-        </div>
-        <div class="cards-grid" id="results"></div>
-    </section>
-
-    <!-- PAGINATION -->
-    <div class="pagination" id="pagination"></div>
+    <!-- DETAIL OVERLAY -->
+    <div class="detail-overlay hidden" id="detail-overlay" onclick="if(event.target===this)fermerDetail()">
+        <button class="detail-close" onclick="fermerDetail()">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+        </button>
+        <div class="detail-panel" id="detail-panel"></div>
+    </div>
 
     <!-- FOOTER -->
     <footer>
@@ -625,16 +869,23 @@
         <svg id="icon-mail" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/></svg>
         <svg id="icon-star" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/></svg>
         <svg id="icon-search-empty" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+        <svg id="icon-calendar" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
+        <svg id="icon-globe" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5a17.92 17.92 0 0 1-8.716-2.247m0 0A8.966 8.966 0 0 1 3 12c0-1.264.26-2.466.732-3.558"/></svg>
     </div>
 
     <script>
         const API = "";
         let page = 0;
         const LIMIT = 24;
+        let dispoSelectionnee = null;
 
         function iconSvg(id) {
             const el = document.getElementById(id);
             return el ? el.outerHTML.replace(/id="[^"]*"/, '') : '';
+        }
+
+        function formatDate(iso) {
+            return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
         }
 
         async function chargerFiltres() {
@@ -662,7 +913,6 @@
                 animateNumber("stat-total", stats.total);
                 animateNumber("stat-types", stats.par_type.length);
                 animateNumber("stat-departements", stats.par_departement.length);
-
                 document.getElementById("nav-count").textContent = `${stats.total.toLocaleString("fr-FR")} enregistrements`;
 
                 fetch(`${API}/api/communes`).then(r => r.json()).then(data => {
@@ -690,11 +940,12 @@
             const container = document.getElementById("results");
             container.innerHTML = Array.from({ length: 6 }, () => `
                 <div class="skeleton-card">
-                    <div class="skeleton skeleton-line tall w60"></div>
-                    <div class="skeleton skeleton-line w80"></div>
-                    <div class="skeleton skeleton-line w40"></div>
-                    <div style="height:12px"></div>
-                    <div class="skeleton skeleton-line w100"></div>
+                    <div class="skeleton skeleton-img"></div>
+                    <div class="skeleton-body">
+                        <div class="skeleton skeleton-line tall w60"></div>
+                        <div class="skeleton skeleton-line w80"></div>
+                        <div class="skeleton skeleton-line w40"></div>
+                    </div>
                 </div>
             `).join("");
         }
@@ -734,30 +985,29 @@
                 }
 
                 container.innerHTML = data.data.map((h, i) => `
-                    <div class="card" style="animation-delay: ${Math.min(i * 40, 400)}ms">
-                        <div class="card-top">
-                            <span class="card-name">${esc(h.nom || "Sans nom")}</span>
-                            <span class="card-badge">${esc(h.type_hebergement || "--")}</span>
-                        </div>
-                        <div class="card-details">
-                            <div class="card-row">
-                                ${iconSvg('icon-pin')}
-                                <span>${esc(h.commune || "--")}${h.code_postal ? ` (${h.code_postal})` : ""}</span>
+                    <a class="card" style="animation-delay: ${Math.min(i * 40, 400)}ms" onclick="ouvrirDetail('${esc(h._id_unique)}')">
+                        <img class="card-img" src="${esc(h.image_url || '')}" alt="${esc(h.nom || '')}" loading="lazy"
+                             onerror="this.src='https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=500&fit=crop'">
+                        <div class="card-body">
+                            <div class="card-top">
+                                <span class="card-name">${esc(h.nom || "Sans nom")}</span>
+                                <span class="card-badge">${esc(h.type_hebergement || "--")}</span>
                             </div>
-                            ${h.adresse ? `<div class="card-row">${iconSvg('icon-home')}<span>${esc(h.adresse)}</span></div>` : ""}
-                            ${h.capacite_personnes ? `<div class="card-row">${iconSvg('icon-users')}<span>${h.capacite_personnes} pers. max</span></div>` : ""}
-                            ${h.classement ? `<div class="card-row">${iconSvg('icon-star')}<span>${esc(h.classement)}</span></div>` : ""}
-                            ${h.telephone ? `<div class="card-row">${iconSvg('icon-phone')}<span>${esc(h.telephone)}</span></div>` : ""}
-                            ${h.email ? `<div class="card-row">${iconSvg('icon-mail')}<span>${esc(h.email)}</span></div>` : ""}
-                        </div>
-                        ${(h.tarif_min || h.tarif_max || h.source) ? `
+                            <div class="card-details">
+                                <div class="card-row">
+                                    ${iconSvg('icon-pin')}
+                                    <span>${esc(h.commune || "--")}${h.code_postal ? ` (${h.code_postal})` : ""}</span>
+                                </div>
+                                ${h.capacite_personnes ? `<div class="card-row">${iconSvg('icon-users')}<span>${h.capacite_personnes} pers. max</span></div>` : ""}
+                                ${h.classement ? `<div class="card-row">${iconSvg('icon-star')}<span>${esc(h.classement)}</span></div>` : ""}
+                            </div>
                             <div class="card-divider"></div>
                             <div class="card-footer">
-                                <span class="card-source">${esc((h.source || "").replace("hebergements_", ""))}</span>
+                                <span class="card-dispo">${h.disponibilites && h.disponibilites.length ? h.disponibilites.length + ' dispo.' : 'Voir dispo.'}</span>
                                 ${h.tarif_min || h.tarif_max ? `<span class="card-price">${h.tarif_min || "--"} - ${h.tarif_max || "--"} EUR</span>` : ""}
                             </div>
-                        ` : ""}
-                    </div>
+                        </div>
+                    </a>
                 `).join("");
 
                 // Pagination
@@ -795,6 +1045,188 @@
             }
         }
 
+        async function ouvrirDetail(idUnique) {
+            dispoSelectionnee = null;
+            const overlay = document.getElementById("detail-overlay");
+            const panel = document.getElementById("detail-panel");
+
+            overlay.classList.remove("hidden");
+            requestAnimationFrame(() => overlay.classList.add("visible"));
+            document.body.style.overflow = "hidden";
+
+            panel.innerHTML = '<div style="padding:60px;text-align:center"><p style="color:var(--text-tertiary)">Chargement...</p></div>';
+
+            try {
+                const resp = await fetch(`${API}/api/hebergements/${idUnique}`);
+                const h = await resp.json();
+
+                const dispos = h.disponibilites || [];
+
+                panel.innerHTML = `
+                    <img class="detail-img" src="${esc(h.image_url || '')}" alt="${esc(h.nom || '')}"
+                         onerror="this.src='https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=500&fit=crop'">
+                    <div class="detail-content">
+                        <div class="detail-header">
+                            <h2 class="detail-name">${esc(h.nom || "Sans nom")}</h2>
+                            <span class="detail-badge">${esc(h.type_hebergement || "--")}</span>
+                        </div>
+
+                        <div class="detail-info-grid">
+                            ${h.commune ? `<div class="detail-info-item">${iconSvg('icon-pin')}<div><div class="detail-info-label">Localisation</div><div class="detail-info-value">${esc(h.commune)}${h.code_postal ? ' (' + h.code_postal + ')' : ''}</div></div></div>` : ''}
+                            ${h.adresse ? `<div class="detail-info-item">${iconSvg('icon-home')}<div><div class="detail-info-label">Adresse</div><div class="detail-info-value">${esc(h.adresse)}</div></div></div>` : ''}
+                            ${h.capacite_personnes ? `<div class="detail-info-item">${iconSvg('icon-users')}<div><div class="detail-info-label">Capacite</div><div class="detail-info-value">${h.capacite_personnes} personnes${h.capacite_chambres ? ' / ' + h.capacite_chambres + ' chambres' : ''}</div></div></div>` : ''}
+                            ${h.classement ? `<div class="detail-info-item">${iconSvg('icon-star')}<div><div class="detail-info-label">Classement</div><div class="detail-info-value">${esc(h.classement)}</div></div></div>` : ''}
+                            ${h.telephone ? `<div class="detail-info-item">${iconSvg('icon-phone')}<div><div class="detail-info-label">Telephone</div><div class="detail-info-value">${esc(h.telephone)}</div></div></div>` : ''}
+                            ${h.email ? `<div class="detail-info-item">${iconSvg('icon-mail')}<div><div class="detail-info-label">Email</div><div class="detail-info-value">${esc(h.email)}</div></div></div>` : ''}
+                            ${h.site_web ? `<div class="detail-info-item">${iconSvg('icon-globe')}<div><div class="detail-info-label">Site web</div><div class="detail-info-value">${esc(h.site_web)}</div></div></div>` : ''}
+                            ${h.tarif_min || h.tarif_max ? `<div class="detail-info-item">${iconSvg('icon-star')}<div><div class="detail-info-label">Tarifs</div><div class="detail-info-value">${h.tarif_min || '--'} - ${h.tarif_max || '--'} EUR</div></div></div>` : ''}
+                        </div>
+
+                        <!-- Disponibilites -->
+                        <div class="section-title">Disponibilites</div>
+                        ${dispos.length > 0 ? `
+                            <div class="dispo-grid" id="dispo-grid">
+                                ${dispos.map((d, i) => `
+                                    <div class="dispo-card" onclick="selectionnerDispo(${i}, this)" data-index="${i}">
+                                        <div class="dispo-dates">${formatDate(d.date_debut)} — ${formatDate(d.date_fin)}</div>
+                                        <div class="dispo-meta">${d.places_restantes} place(s) restante(s)</div>
+                                        <div class="dispo-prix">${d.prix_nuit} EUR / nuit</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : '<p style="color:var(--text-tertiary);font-size:0.88rem;margin-bottom:24px">Aucune disponibilite pour le moment.</p>'}
+
+                        <!-- Formulaire de reservation -->
+                        <div class="section-title">Reserver cet hebergement</div>
+                        <div class="reservation-form">
+                            <form class="form-grid" id="form-reservation" onsubmit="return envoyerReservation(event, '${esc(h._id_unique)}')">
+                                <div class="form-group">
+                                    <label class="form-label">Nom *</label>
+                                    <input class="form-input" type="text" name="nom_client" required placeholder="Dupont">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Prenom *</label>
+                                    <input class="form-input" type="text" name="prenom_client" required placeholder="Jean">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Email *</label>
+                                    <input class="form-input" type="email" name="email_client" required placeholder="jean.dupont@email.fr">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Telephone *</label>
+                                    <input class="form-input" type="tel" name="telephone_client" required placeholder="06 12 34 56 78">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Date d'arrivee *</label>
+                                    <input class="form-input" type="date" name="date_arrivee" id="date_arrivee" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Date de depart *</label>
+                                    <input class="form-input" type="date" name="date_depart" id="date_depart" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Nombre de personnes *</label>
+                                    <input class="form-input" type="number" name="nb_personnes" required min="1" max="20" value="2">
+                                </div>
+                                <div class="form-group full">
+                                    <label class="form-label">Message (optionnel)</label>
+                                    <textarea class="form-input" name="message" placeholder="Demandes particulieres, heure d'arrivee..."></textarea>
+                                </div>
+                                <div class="form-message" id="form-message"></div>
+                                <button type="submit" class="btn-reserver" id="btn-reserver">Envoyer la demande de reservation</button>
+                            </form>
+                        </div>
+                    </div>
+                `;
+
+                // Stocker les dispos pour le remplissage auto
+                panel._dispos = dispos;
+
+            } catch (e) {
+                panel.innerHTML = '<div style="padding:60px;text-align:center"><p style="color:var(--text-tertiary)">Erreur de chargement.</p></div>';
+                console.error(e);
+            }
+        }
+
+        function selectionnerDispo(index, el) {
+            // Deselectionner toutes
+            document.querySelectorAll('.dispo-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+
+            const panel = document.getElementById("detail-panel");
+            const d = panel._dispos[index];
+            if (d) {
+                document.getElementById('date_arrivee').value = d.date_debut;
+                document.getElementById('date_depart').value = d.date_fin;
+                dispoSelectionnee = d;
+            }
+        }
+
+        async function envoyerReservation(e, idHebergement) {
+            e.preventDefault();
+            const form = document.getElementById("form-reservation");
+            const btn = document.getElementById("btn-reserver");
+            const msg = document.getElementById("form-message");
+            const formData = new FormData(form);
+
+            btn.disabled = true;
+            btn.textContent = "Envoi en cours...";
+            msg.className = "form-message";
+            msg.style.display = "none";
+
+            const payload = {
+                id_hebergement: idHebergement,
+                nom_client: formData.get("nom_client"),
+                prenom_client: formData.get("prenom_client"),
+                email_client: formData.get("email_client"),
+                telephone_client: formData.get("telephone_client"),
+                date_arrivee: formData.get("date_arrivee"),
+                date_depart: formData.get("date_depart"),
+                nb_personnes: formData.get("nb_personnes"),
+                message: formData.get("message") || "",
+            };
+
+            try {
+                const resp = await fetch(`${API}/api/reservations`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                const result = await resp.json();
+
+                if (resp.ok) {
+                    msg.className = "form-message success";
+                    msg.textContent = "Reservation envoyee avec succes ! Vous recevrez une confirmation par email.";
+                    msg.style.display = "block";
+                    form.reset();
+                } else {
+                    msg.className = "form-message error";
+                    msg.textContent = result.error || "Erreur lors de la reservation.";
+                    msg.style.display = "block";
+                }
+            } catch (err) {
+                msg.className = "form-message error";
+                msg.textContent = "Impossible de contacter le serveur.";
+                msg.style.display = "block";
+            }
+
+            btn.disabled = false;
+            btn.textContent = "Envoyer la demande de reservation";
+            return false;
+        }
+
+        function fermerDetail() {
+            const overlay = document.getElementById("detail-overlay");
+            overlay.classList.remove("visible");
+            document.body.style.overflow = "";
+            setTimeout(() => overlay.classList.add("hidden"), 300);
+        }
+
+        function afficherListe() {
+            fermerDetail();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
         function reinitialiser() {
             document.getElementById("search").value = "";
             document.getElementById("type-filter").value = "";
@@ -807,6 +1239,11 @@
             div.textContent = str;
             return div.innerHTML;
         }
+
+        // Fermer avec Escape
+        document.addEventListener("keydown", e => {
+            if (e.key === "Escape") fermerDetail();
+        });
 
         document.getElementById("search").addEventListener("keydown", e => {
             if (e.key === "Enter") rechercher();
