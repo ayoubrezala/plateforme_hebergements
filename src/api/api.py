@@ -20,6 +20,22 @@ CORS(app)
 
 mongo = GestionnaireMongo()
 
+# --- Chatbot ---
+_chatbot = None
+
+
+def _get_chatbot():
+    """Initialise le chatbot à la demande (lazy loading)."""
+    global _chatbot
+    if _chatbot is None:
+        try:
+            from src.chatbot.assistant import AssistantChatbot
+            _chatbot = AssistantChatbot()
+            logger.info("Chatbot initialisé avec succès")
+        except Exception as e:
+            logger.warning(f"Chatbot non disponible : {e}")
+    return _chatbot
+
 
 def _serialiser(obj):
     """Convertit les objets MongoDB en JSON sérialisable."""
@@ -161,6 +177,28 @@ def obtenir_statistiques():
     """Retourne les statistiques globales des données."""
     stats = mongo.obtenir_statistiques()
     return jsonify(_serialiser(stats))
+
+
+@app.route("/api/chat", methods=["POST"])
+def chat():
+    """Endpoint du chatbot — reçoit un message et retourne la réponse IA."""
+    data = request.get_json()
+    message = data.get("message", "").strip()
+    historique = data.get("historique", [])
+
+    if not message:
+        return jsonify({"error": "Message vide"}), 400
+
+    bot = _get_chatbot()
+    if bot is None:
+        return jsonify({"error": "Chatbot non disponible (clé API manquante)"}), 503
+
+    try:
+        reponse = bot.repondre(message, historique)
+        return jsonify({"reponse": reponse})
+    except Exception as e:
+        logger.error(f"Erreur chatbot : {e}")
+        return jsonify({"error": "Erreur lors de la génération de la réponse"}), 500
 
 
 @app.route("/api/health", methods=["GET"])

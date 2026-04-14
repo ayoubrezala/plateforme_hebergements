@@ -5,4 +5,5 @@ requests>=2.31
 mariadb>=1.1
 fpdf2>=2.7
 openpyxl>=3.1
+anthropic>=0.39
 pytest>=8.0

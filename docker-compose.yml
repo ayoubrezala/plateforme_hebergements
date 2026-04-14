@@ -46,7 +46,7 @@ services:
     volumes:
       - datalake:/app/data_lake
 
-  # Étape 2 : serveur web + API
+  # Étape 2 : serveur web + API + Chatbot
   web:
     build: .
     container_name: serveur_web
@@ -58,11 +58,13 @@ services:
       MARIADB_PORT: "3306"
       MARIADB_USER: etl_user
       MARIADB_PASSWORD: etl_pass
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
     depends_on:
       mongodb:
         condition: service_started
     volumes:
       - datalake:/app/data_lake
+    restart: unless-stopped
 
 volumes:
   mongo_data:
