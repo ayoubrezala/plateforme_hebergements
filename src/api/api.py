@@ -139,6 +139,9 @@ def creer_reservation():
         "date_depart": data["date_depart"],
         "nb_personnes": int(data["nb_personnes"]),
         "message": data.get("message", ""),
+        "prix_nuit": data.get("prix_nuit"),
+        "nb_nuits": data.get("nb_nuits"),
+        "prix_total": data.get("prix_total"),
         "statut": "en_attente",
         "date_creation": datetime.now().isoformat(),
     }

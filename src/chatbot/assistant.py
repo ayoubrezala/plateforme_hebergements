@@ -26,7 +26,8 @@ Règles :
 - Recommande des hébergements concrets avec leur nom, commune, type et capacité.
 - Si le visiteur cherche un lieu précis, filtre par commune ou département.
 - Si tu ne trouves pas d'hébergement correspondant, dis-le honnêtement.
-- Ne donne jamais de prix inventés — dis que le visiteur doit contacter l'hébergement.
+- Chaque hébergement a des créneaux de disponibilité avec un prix par nuit — communique-les quand disponibles.
+- Pour les séjours de 7 nuits ou plus, une remise de 10% s'applique automatiquement.
 - Propose des liens vers la fiche si possible (format: /api/hebergements/<id>).
 """
 
@@ -81,10 +82,16 @@ class AssistantChatbot:
         if resultats:
             contexte_recherche = "\n\nRésultats de recherche pour cette question :\n"
             for r in resultats:
+                dispos = r.get('disponibilites', [])
+                prix_info = ""
+                if dispos:
+                    prix_min = min(d['prix_nuit'] for d in dispos)
+                    prix_max = max(d['prix_nuit'] for d in dispos)
+                    prix_info = f" | Prix: {prix_min}-{prix_max} EUR/nuit | {len(dispos)} créneaux dispo"
                 contexte_recherche += (
                     f"- {r.get('nom', 'N/A')} | {r.get('type_hebergement', '')} | "
                     f"{r.get('commune', '')} ({r.get('departement', '')}) | "
-                    f"Capacité: {r.get('capacite_personnes', 'N/A')} pers. | "
+                    f"Capacité: {r.get('capacite_personnes', 'N/A')} pers.{prix_info} | "
                     f"ID: {r.get('_id_unique', '')}\n"
                 )
 

@@ -63,6 +63,37 @@ CREATE TABLE IF NOT EXISTS fait_hebergement (
     FOREIGN KEY (id_source) REFERENCES dim_source(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Table de faits : disponibilités par hébergement
+CREATE TABLE IF NOT EXISTS fait_disponibilite (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_hebergement INT NOT NULL,
+    date_debut DATE NOT NULL,
+    date_fin DATE NOT NULL,
+    prix_nuit INT,
+    places_restantes INT,
+    FOREIGN KEY (id_hebergement) REFERENCES fait_hebergement(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table de faits : réservations
+CREATE TABLE IF NOT EXISTS fait_reservation (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_unique_hebergement VARCHAR(64) NOT NULL,
+    nom_hebergement VARCHAR(500),
+    nom_client VARCHAR(200) NOT NULL,
+    prenom_client VARCHAR(200) NOT NULL,
+    email_client VARCHAR(200) NOT NULL,
+    telephone_client VARCHAR(50),
+    date_arrivee DATE NOT NULL,
+    date_depart DATE NOT NULL,
+    nb_personnes INT,
+    prix_nuit INT,
+    nb_nuits INT,
+    prix_total INT,
+    message TEXT,
+    statut VARCHAR(50) DEFAULT 'en_attente',
+    date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- Vue analytique : résumé par département et type
 CREATE OR REPLACE VIEW vue_resume_departement AS
 SELECT
@@ -276,6 +307,44 @@ class GestionnaireWarehouse:
 
         curseur.close()
         logger.info(f"  → {inseres} enregistrements chargés dans le Data Warehouse")
+        return inseres
+
+    def charger_disponibilites(self, donnees: list[dict]):
+        """Charge les disponibilités dans le Data Warehouse."""
+        curseur = self._conn.cursor()
+        curseur.execute("USE dw_hebergements")
+        curseur.execute("DELETE FROM fait_disponibilite")
+
+        inseres = 0
+        for doc in donnees:
+            dispos = doc.get("disponibilites", [])
+            if not dispos:
+                continue
+            # Récupérer l'id de l'hébergement
+            curseur.execute(
+                "SELECT id FROM fait_hebergement WHERE id_unique = ?",
+                (doc["_id_unique"],)
+            )
+            row = curseur.fetchone()
+            if not row:
+                continue
+            id_heb = row[0]
+
+            for d in dispos:
+                try:
+                    curseur.execute(
+                        """INSERT INTO fait_disponibilite
+                           (id_hebergement, date_debut, date_fin, prix_nuit, places_restantes)
+                           VALUES (?, ?, ?, ?, ?)""",
+                        (id_heb, d["date_debut"], d["date_fin"],
+                         d.get("prix_nuit"), d.get("places_restantes"))
+                    )
+                    inseres += 1
+                except Exception as e:
+                    logger.warning(f"Erreur chargement disponibilité : {e}")
+
+        curseur.close()
+        logger.info(f"  → {inseres} disponibilités chargées dans le Data Warehouse")
         return inseres
 
     def executer_requete(self, sql: str, params: tuple = None) -> list[dict]:

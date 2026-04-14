@@ -696,6 +696,31 @@
         .form-input::placeholder { color: var(--text-tertiary); }
         textarea.form-input { resize: vertical; min-height: 80px; }
 
+        .recap-prix {
+            grid-column: 1 / -1;
+            background: var(--accent-light);
+            border: 1px solid var(--accent);
+            border-radius: var(--radius-sm);
+            padding: 16px 20px;
+            display: none;
+        }
+        .recap-prix.visible { display: block; }
+        .recap-ligne {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        .recap-ligne.total {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--accent-dark);
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid var(--accent);
+        }
+
         .btn-reserver {
             grid-column: 1 / -1;
             padding: 12px 28px;
@@ -1118,11 +1143,11 @@
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Date d'arrivee *</label>
-                                    <input class="form-input" type="date" name="date_arrivee" id="date_arrivee" required>
+                                    <input class="form-input" type="date" name="date_arrivee" id="date_arrivee" required onchange="calculerRecap()">
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Date de depart *</label>
-                                    <input class="form-input" type="date" name="date_depart" id="date_depart" required>
+                                    <input class="form-input" type="date" name="date_depart" id="date_depart" required onchange="calculerRecap()">
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Nombre de personnes *</label>
@@ -1132,6 +1157,7 @@
                                     <label class="form-label">Message (optionnel)</label>
                                     <textarea class="form-input" name="message" placeholder="Demandes particulieres, heure d'arrivee..."></textarea>
                                 </div>
+                                <div class="recap-prix" id="recap-prix"></div>
                                 <div class="form-message" id="form-message"></div>
                                 <button type="submit" class="btn-reserver" id="btn-reserver">Envoyer la demande de reservation</button>
                             </form>
@@ -1159,7 +1185,39 @@
                 document.getElementById('date_arrivee').value = d.date_debut;
                 document.getElementById('date_depart').value = d.date_fin;
                 dispoSelectionnee = d;
+                calculerRecap();
             }
+        }
+
+        function calculerRecap() {
+            const recap = document.getElementById("recap-prix");
+            if (!recap) return;
+            const dateA = document.getElementById("date_arrivee").value;
+            const dateD = document.getElementById("date_depart").value;
+
+            if (!dateA || !dateD || !dispoSelectionnee) {
+                recap.classList.remove("visible");
+                return;
+            }
+
+            const d1 = new Date(dateA);
+            const d2 = new Date(dateD);
+            const nuits = Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+
+            if (nuits <= 0) {
+                recap.classList.remove("visible");
+                return;
+            }
+
+            const prixNuit = dispoSelectionnee.prix_nuit;
+            const total = prixNuit * nuits;
+
+            recap.innerHTML = `
+                <div class="recap-ligne"><span>${nuits} nuit${nuits > 1 ? 's' : ''} x ${prixNuit} EUR</span><span>${total} EUR</span></div>
+                ${nuits >= 7 ? '<div class="recap-ligne"><span>Remise semaine (-10%)</span><span>-' + Math.round(total * 0.1) + ' EUR</span></div>' : ''}
+                <div class="recap-ligne total"><span>Total</span><span>${nuits >= 7 ? Math.round(total * 0.9) : total} EUR</span></div>
+            `;
+            recap.classList.add("visible");
         }
 
         async function envoyerReservation(e, idHebergement) {
@@ -1174,16 +1232,27 @@
             msg.className = "form-message";
             msg.style.display = "none";
 
+            // Calcul du prix total
+            const dateA = formData.get("date_arrivee");
+            const dateD = formData.get("date_depart");
+            const nuits = Math.round((new Date(dateD) - new Date(dateA)) / (1000 * 60 * 60 * 24));
+            const prixNuit = dispoSelectionnee ? dispoSelectionnee.prix_nuit : null;
+            const totalBrut = prixNuit ? prixNuit * nuits : null;
+            const total = totalBrut && nuits >= 7 ? Math.round(totalBrut * 0.9) : totalBrut;
+
             const payload = {
                 id_hebergement: idHebergement,
                 nom_client: formData.get("nom_client"),
                 prenom_client: formData.get("prenom_client"),
                 email_client: formData.get("email_client"),
                 telephone_client: formData.get("telephone_client"),
-                date_arrivee: formData.get("date_arrivee"),
-                date_depart: formData.get("date_depart"),
+                date_arrivee: dateA,
+                date_depart: dateD,
                 nb_personnes: formData.get("nb_personnes"),
                 message: formData.get("message") || "",
+                prix_nuit: prixNuit,
+                nb_nuits: nuits,
+                prix_total: total,
             };
 
             try {

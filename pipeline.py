@@ -73,6 +73,7 @@ def executer_pipeline():
         dw.connecter()
         dw.initialiser_schema()
         dw.charger_donnees(donnees_propres)
+        dw.charger_disponibilites(donnees_propres)
         stats_dw = dw.obtenir_statistiques()
         logger.info(f"  Data Warehouse — {stats_dw['total']} enregistrements")
         dw.fermer()
