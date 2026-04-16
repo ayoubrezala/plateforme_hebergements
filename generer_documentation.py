@@ -87,7 +87,7 @@ def generer():
     pdf.ln(30)
     pdf.set_font("Helvetica", "", 11)
     pdf.set_text_color(60, 60, 60)
-    pdf.cell(0, 7, "Technologies : Python, MongoDB, MariaDB, Flask, Docker", align="C", new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(0, 7, "Technologies : Python, MongoDB, MariaDB, Flask, Claude IA, Docker", align="C", new_x="LMARGIN", new_y="NEXT")
     pdf.cell(0, 7, "Sources : Atout France / Pays de la Loire / Ile-de-France / Loire-Atlantique / Saint-Malo", align="C", new_x="LMARGIN", new_y="NEXT")
 
     # === 1. INTRODUCTION ===
@@ -145,6 +145,8 @@ def generer():
         "|   |   |-- gestionnaire_datalake.py\n"
         "|   |-- api/                 # API REST Flask\n"
         "|   |   |-- api.py\n"
+        "|   |-- chatbot/             # Assistant IA (Anthropic Claude)\n"
+        "|   |   |-- assistant.py\n"
         "|   |-- web/templates/       # Interface web\n"
         "|       |-- index.html\n"
         "|-- tests/                   # Tests unitaires + integration\n"
@@ -347,9 +349,60 @@ def generer():
         "sur le nom, la commune et le type d'hebergement."
     )
 
-    # === 9. INTERFACE WEB ===
+    # === 9. CHATBOT IA ===
     pdf.add_page()
-    pdf.titre_section("9. Interface Web")
+    pdf.titre_section("9. Chatbot IA (Assistant Virtuel)")
+    pdf.paragraphe(
+        "La plateforme integre un assistant conversationnel base sur l'API Claude (Anthropic). "
+        "Le chatbot aide les visiteurs a trouver un hebergement adapte a leurs besoins "
+        "en interrogeant directement la base MongoDB."
+    )
+
+    pdf.sous_titre("Architecture du chatbot")
+    pdf.paragraphe(
+        "Le module src/chatbot/assistant.py implemente la classe AssistantChatbot. "
+        "A l'initialisation, le chatbot charge un contexte global depuis MongoDB "
+        "(statistiques, types disponibles, departements couverts) qui est injecte "
+        "dans le prompt systeme de Claude. A chaque message de l'utilisateur, "
+        "une recherche MongoDB est effectuee pour enrichir le contexte avec "
+        "des hebergements pertinents (nom, commune, departement, type)."
+    )
+
+    pdf.sous_titre("Fonctionnalites")
+    pdf.puce("Recherche contextuelle : le chatbot interroge MongoDB a chaque message "
+             "pour proposer des hebergements concrets avec nom, commune, type et capacite")
+    pdf.puce("Historique conversationnel : les 10 derniers echanges sont conserves "
+             "pour maintenir le contexte de la conversation")
+    pdf.puce("Informations tarifaires : le chatbot communique les creneaux de disponibilite "
+             "avec les prix par nuit et les places restantes")
+    pdf.puce("Remise automatique : pour les sejours de 7 nuits ou plus, une remise de 10% "
+             "est appliquee automatiquement")
+    pdf.puce("Liens directs : le chatbot propose des liens vers les fiches hebergement "
+             "via l'API (/api/hebergements/<id>)")
+    pdf.puce("Lazy loading : le chatbot n'est initialise qu'au premier message recu, "
+             "evitant de bloquer le demarrage du serveur si la cle API est absente")
+
+    pdf.sous_titre("Endpoint API")
+    pdf.code_block(
+        "POST /api/chat\n"
+        "Corps JSON :\n"
+        '  { "message": "Je cherche un hotel a Nantes",\n'
+        '    "historique": [...] }\n'
+        "\n"
+        "Reponse JSON :\n"
+        '  { "reponse": "Voici les hotels disponibles a Nantes..." }'
+    )
+
+    pdf.sous_titre("Modele utilise")
+    pdf.paragraphe(
+        "Le chatbot utilise le modele Claude Sonnet (claude-sonnet-4-20250514) avec une limite "
+        "de 1024 tokens par reponse. La cle API est fournie via la variable d'environnement "
+        "ANTHROPIC_API_KEY, configuree dans le docker-compose.yml pour le conteneur web."
+    )
+
+    # === 10. INTERFACE WEB  ===
+    pdf.add_page()
+    pdf.titre_section("10. Interface Web")
     pdf.paragraphe(
         "Le mini site web est une Single Page Application (SPA) en HTML/CSS/JavaScript pur, "
         "sans framework externe. Il communique avec l'API REST via fetch()."
@@ -371,7 +424,7 @@ def generer():
 
     # === 10. TESTS ===
     pdf.add_page()
-    pdf.titre_section("10. Tests")
+    pdf.titre_section("11. Tests")
     pdf.paragraphe(
         "Le projet comporte 39 tests repartis en tests unitaires et tests d'integration :"
     )
@@ -395,7 +448,7 @@ def generer():
 
     # === 11. PRINCIPES SOLID ===
     pdf.add_page()
-    pdf.titre_section("11. Principes SOLID et Bonnes Pratiques")
+    pdf.titre_section("12. Principes SOLID et Bonnes Pratiques")
 
     pdf.puce("S - Single Responsibility : chaque module a une responsabilite unique "
              "(collecte, nettoyage, stockage, API, export)")
@@ -410,7 +463,7 @@ def generer():
 
     # === 12. POWER BI ===
     pdf.add_page()
-    pdf.titre_section("12. Integration Power BI")
+    pdf.titre_section("13. Integration Power BI")
     pdf.paragraphe(
         "Le Data Warehouse est concu pour etre exploite avec Power BI. "
         "Deux methodes de connexion sont disponibles."
@@ -475,7 +528,7 @@ def generer():
 
     # === 13. DOCKERISATION ===
     pdf.add_page()
-    pdf.titre_section("13. Dockerisation")
+    pdf.titre_section("14. Dockerisation")
     pdf.paragraphe(
         "Le projet est entierement conteneurise avec Docker et Docker Compose. "
         "Cela permet de deployer l'ensemble de la plateforme (bases de donnees, pipeline ETL, "
@@ -546,7 +599,7 @@ def generer():
 
     # === 14. MISE EN ROUTE ===
     pdf.add_page()
-    pdf.titre_section("14. Guide d'Installation et d'Utilisation")
+    pdf.titre_section("15. Guide d'Installation et d'Utilisation")
 
     pdf.sous_titre("Option A : Avec Docker (recommande)")
     pdf.puce("Docker et Docker Compose installes sur la machine")
