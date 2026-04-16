@@ -7,8 +7,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=General+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         :root {
             --surface-0: oklch(0.985 0.005 250);
@@ -166,79 +164,6 @@
             color: var(--text-tertiary);
             letter-spacing: 0.01em;
         }
-
-        /* ── MAP ── */
-        .map-section {
-            max-width: 1320px;
-            margin: 0 auto;
-            padding: clamp(24px, 3vw, 40px) clamp(16px, 4vw, 48px);
-        }
-        .map-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            margin-bottom: 16px;
-        }
-        .map-title {
-            font-size: 0.82rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: var(--text-tertiary);
-        }
-        .map-count {
-            font-family: var(--font-mono);
-            font-size: 0.78rem;
-            color: var(--text-tertiary);
-        }
-        .map-container {
-            width: 100%;
-            height: 480px;
-            border-radius: var(--radius-md);
-            border: 1px solid var(--border);
-            overflow: hidden;
-            background: var(--surface-2);
-        }
-        .map-container .leaflet-popup-content-wrapper {
-            border-radius: var(--radius-sm);
-            box-shadow: var(--shadow-md);
-        }
-        .map-container .leaflet-popup-content {
-            margin: 12px 16px;
-            font-family: var(--font-sans);
-            font-size: 0.85rem;
-            line-height: 1.5;
-        }
-        .map-popup-name {
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: var(--text-primary);
-            margin-bottom: 4px;
-        }
-        .map-popup-type {
-            display: inline-block;
-            padding: 2px 8px;
-            background: var(--accent-light);
-            color: var(--accent-dark);
-            font-size: 0.7rem;
-            font-weight: 600;
-            border-radius: 100px;
-            margin-bottom: 6px;
-        }
-        .map-popup-info {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-        .map-popup-link {
-            display: inline-block;
-            margin-top: 8px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--accent);
-            cursor: pointer;
-            text-decoration: none;
-        }
-        .map-popup-link:hover { text-decoration: underline; }
 
         /* ── FILTERS ── */
         .filter-section {
@@ -911,15 +836,6 @@
             </div>
         </div>
 
-        <!-- MAP -->
-        <section class="map-section">
-            <div class="map-header">
-                <span class="map-title">Carte des hebergements</span>
-                <span class="map-count" id="map-count"></span>
-            </div>
-            <div class="map-container" id="map"></div>
-        </section>
-
         <!-- FILTERS -->
         <section class="filter-section">
             <div class="filter-bar">
@@ -1405,50 +1321,6 @@
         chargerFiltres();
         rechercher();
 
-        // ─── Carte Leaflet ───
-        const carte = L.map('map').setView([47.0, 2.0], 6);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap',
-            maxZoom: 18
-        }).addTo(carte);
-
-        async function chargerCarte() {
-            try {
-                const resp = await fetch(`${API}/api/carte`);
-                const data = await resp.json();
-                document.getElementById('map-count').textContent = `${data.count} points geolocalises`;
-
-                const markers = L.markerClusterGroup ? L.markerClusterGroup() : L.layerGroup();
-                data.data.forEach(h => {
-                    if (!h.latitude || !h.longitude) return;
-                    const marker = L.circleMarker([h.latitude, h.longitude], {
-                        radius: 6,
-                        fillColor: '#2d8a6e',
-                        color: '#1a5c4a',
-                        weight: 1.5,
-                        opacity: 0.9,
-                        fillOpacity: 0.7
-                    });
-                    marker.bindPopup(`
-                        <div class="map-popup-name">${esc(h.nom || 'Sans nom')}</div>
-                        <span class="map-popup-type">${esc(h.type_hebergement || '--')}</span>
-                        <div class="map-popup-info">${esc(h.commune || '')}${h.departement ? ' (' + h.departement + ')' : ''}</div>
-                        ${h.capacite_personnes ? '<div class="map-popup-info">' + h.capacite_personnes + ' pers. max</div>' : ''}
-                        <a class="map-popup-link" onclick="fermerDetail();ouvrirDetail('${esc(h._id_unique)}')">Voir la fiche →</a>
-                    `);
-                    markers.addLayer(marker);
-                });
-                markers.addTo(carte);
-
-                if (data.count > 0) {
-                    const bounds = markers.getBounds();
-                    if (bounds.isValid()) carte.fitBounds(bounds, { padding: [30, 30] });
-                }
-            } catch (e) {
-                console.error('Erreur chargement carte:', e);
-            }
-        }
-        chargerCarte();
 
         // ─── Chatbot Widget ───
         const chatHTML = `
