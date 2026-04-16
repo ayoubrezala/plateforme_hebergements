@@ -204,6 +204,22 @@ def chat():
         return jsonify({"error": "Erreur lors de la génération de la réponse"}), 500
 
 
+@app.route("/api/carte", methods=["GET"])
+def donnees_carte():
+    """Retourne les coordonnées de tous les hébergements pour la carte."""
+    projection = {
+        "_id": 0, "_id_unique": 1, "nom": 1, "type_hebergement": 1,
+        "commune": 1, "departement": 1, "latitude": 1, "longitude": 1,
+        "capacite_personnes": 1
+    }
+    resultats = mongo.rechercher(
+        {"latitude": {"$ne": None}, "longitude": {"$ne": None}},
+        projection,
+        limite=10000
+    )
+    return jsonify({"count": len(resultats), "data": _serialiser(resultats)})
+
+
 @app.route("/api/health", methods=["GET"])
 def health_check():
     """Vérification de l'état de l'API."""
